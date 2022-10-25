@@ -12,6 +12,7 @@ profile_netboot() {
 	desc="Kernel, initramfs and modloop for
 		netboot.
 		"
+	apks=""
 	arch="aarch64 armhf armv7 ppc64le x86 x86_64 s390x"
 	kernel_cmdline="nomodeset"
 	case "$ARCH" in
@@ -23,10 +24,14 @@ profile_netboot() {
 	esac
 	case "$ARCH" in
 		s390x) initfs_features="base network squashfs usb dasd_mod qeth zfcp";;
+		aarch64)
+			initfs_features="base network squashfs usb virtio zfs"
+			apks="$apks zfs"
+			kernel_addons="zfs"
+			;;
 		*) initfs_features="base network squashfs usb virtio"
 	esac
 	modloop_sign=yes
-	apks=""
 	output_format="netboot"
 	image_ext="tar.gz"
 }
