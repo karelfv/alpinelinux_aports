@@ -1,0 +1,108 @@
+# Contributor: Carlo Landmeter <clandmeter@alpinelinux.org>
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+
+# when changing _ver we *must* bump _rel
+_name=zfs
+_ver=2.1.5
+_rel=0
+
+_flavor=precidata
+_kpkg=linux-$_flavor
+_kver=5.15.40
+_krel=1
+
+_kpkgver="$_kver-r$_krel"
+
+# for custom kernels set $FLAVOR
+
+_kpkg=linux-$_flavor
+_kabi="$_kver-$_krel-$_flavor"
+
+pkgname=$_name-$_flavor
+pkgver=$_kver
+pkgrel=$(( $_krel + $_rel ))
+
+pkgdesc="ZFS Linux kernel modules"
+url="https://openzfs.org"
+arch="aarch64"
+license="CDDL-1.0"
+depends="$_kpkg=$_kpkgver"
+depends_dev="glib-dev e2fsprogs-dev util-linux-dev libtirpc-dev
+	$_kpkg-dev=$_kpkgver"
+
+makedepends="$depends_dev automake autoconf libtool linux-headers xz"
+install_if="zfs $_kpkg=$_kpkgver"
+subpackages="$pkgname-dev"
+source="https://github.com/openzfs/zfs/releases/download/zfs-$_ver/zfs-$_ver.tar.gz"
+builddir="$srcdir/$_name-$_ver"
+
+for f in $_extra_flavors; do
+	makedepends="$makedepends linux-$f-dev=$_kpkgver"
+	subpackages="$subpackages zfs-$f:_extra"
+done
+
+prepare() {
+	default_prepare
+	# verify the kernel version
+	local _kapkbuild="$startdir"/../../main/linux-$_flavor-/APKBUILD
+	if [ -f $_kapkbuild ]; then
+		(	. $_kapkbuild
+			pkgname=$_name-$_flavor
+			[ "$_kver" != "$pkgver" ] && die "please update _kver to $pkgver"
+			[ "$_krel" != "$pkgrel" ] && die "please update _krel to $pkgrel"
+			return 0
+		)
+	fi
+	autoreconf -vif
+}
+
+build() {
+	cd "$builddir"
+	local flavor= kabi=
+	for flavor in $_flavor $_extra_flavors; do
+		kabi="$_kver-$_krel-$flavor"
+		mkdir -p "$kabi"
+		(cd $kabi
+		../configure --prefix=/usr \
+			--with-tirpc \
+			--sysconfdir=/etc \
+			--mandir=/usr/share/man \
+			--infodir=/usr/share/info \
+			--localstatedir=/var \
+			--with-config=kernel \
+			--with-linux=/usr/src/linux-headers-$kabi
+
+		make
+		)
+	done
+}
+
+package() {
+	cd "$builddir"
+	local flavor= kabi=
+	for flavor in $_flavor $_extra_flavors; do
+		kabi="$_kver-$_krel-$flavor"
+		(cd $kabi && make DESTDIR="$pkgdir" install)
+	done
+}
+
+_extra() {
+	local flavor=${subpkgname##*-}
+	depends="linux-$flavor=$_kpkgver"
+	install_if="zfs linux-$flavor=$_kpkgver"
+	pkgdesc="ZFS Linux kernel modules for $flavor"
+
+	kabi="$_kver-$_krel-$flavor"
+	mkdir -p "$subpkgdir"/lib/modules
+	mv "$pkgdir"/lib/modules/$kabi "$subpkgdir"/lib/modules
+}
+
+dev() {
+	mkdir -p "$subpkgdir"/usr
+	mv "$pkgdir"/usr/src "$subpkgdir"/usr
+	default_dev
+}
+
+sha512sums="
+d9ccf1049cefa9167d25f71fbdca70092cd02368b60f09341e6489fb68dc5f89e87b026b0191f4d81181a8851449124d824a1d959d0e2fb29c8a3d624edc4f03  zfs-2.1.5.tar.gz
+"
