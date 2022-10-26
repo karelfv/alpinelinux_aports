@@ -6,7 +6,7 @@ case $pkgver in
 	*.*.*)	_kernver=${pkgver%.*};;
 	*.*) _kernver=$pkgver;;
 esac
-pkgrel=1
+pkgrel=2
 _defconfig="toradex_defconfig"
 pkgdesc="Linux kernel for Toradex i.MX8M Plus module and for NXP LS1012A-FRWY board"
 url="http://kernel.org"
@@ -19,6 +19,7 @@ _config=${config:-config-toradex.${CARCH}}
 install=
 source="http://0.0.0.0/kernel/linux-$pkgver.tar
 	config-precidata.aarch64
+	fsl-ls1012a.dtsi.patch
 	"
 subpackages="$pkgname-dev:_dev:$CBUILD_ARCH"
 _flavors=
@@ -200,4 +201,5 @@ _dev() {
 
 sha512sums="
 831612bcf19ba0d69a8b861ac4e7ddbc07cfa282ad1e32c400daa10be081cde72ee73b1673d0e36c8d6293276d1b7f81ad1b33feb12b12dfdf674894d63ce67f  linux-5.15.40.tar
-66c725db78aad66c4aecdab26808f96fe7ce657f8d0ba42c92fdb7c26cb8fa4d74a3c6641970610b9e1bd29ef6365700ac0ec725eba63dd8cc6f49e2f7adabdd  config-precidata.aarch64"
+66c725db78aad66c4aecdab26808f96fe7ce657f8d0ba42c92fdb7c26cb8fa4d74a3c6641970610b9e1bd29ef6365700ac0ec725eba63dd8cc6f49e2f7adabdd  config-precidata.aarch64
+828f7ea03ab94a3e4a82d3e6a5d9de8aa2e3125e8cd9b4a9e5a379bc1ccdf2ca83cf35071959217f0c78fa695b7596ef529e26069b22c9581eb383ba19485678  fsl-ls1012a.dtsi.patch"

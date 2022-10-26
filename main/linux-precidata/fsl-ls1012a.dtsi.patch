@@ -1,0 +1,28 @@
+--- a/arch/arm64/boot/dts/freescale/fsl-ls1012a.dtsi.orig	2022-10-26 11:19:25.187441139 +0200
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1012a.dtsi	2022-10-26 11:19:38.300411065 +0200
+@@ -376,7 +376,24 @@
+ 					    QORIQ_CLK_PLL_DIV(1)>;
+ 			spi-num-chipselects = <5>;
+ 			big-endian;
+-			status = "disabled";
++			status = "okay";
++			bus-num = <0x01>;
++
++			spidev@0 {
++				compatible = "rohm,dh2228fv";
++				spi-max-frequency = <0x124f800>;
++				reg = <0x00>;
++				fsl,spi-cs-sck-delay = <0x64>;
++				fsl,spi-sck-cs-delay = <0x64>;
++			};
++
++			spidev@1 {
++				compatible = "rohm,dh2228fv";
++				spi-max-frequency = <0x2dc6c00>;
++				reg = <0x01>;
++				fsl,spi-cs-sck-delay = <0x64>;
++				fsl,spi-sck-cs-delay = <0x64>;
++			};
+ 		};
+ 
+ 		duart0: serial@21c0500 {
