@@ -8,7 +8,7 @@ case $pkgver in
 esac
 pkgrel=1
 _defconfig="toradex_defconfig"
-pkgdesc="Linux kernel for Toradex i.MX8M Plus module"
+pkgdesc="Linux kernel for Toradex i.MX8M Plus module and for NXP LS1012A-FRWY board"
 url="http://kernel.org"
 depends="initramfs-generator"
 _depends_dev="perl gmp-dev elfutils-dev bash flex bison"
