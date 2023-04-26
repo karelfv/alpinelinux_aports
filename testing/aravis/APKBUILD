@@ -1,0 +1,56 @@
+# Contributor:
+# Maintainer: Karel Gardas <karel@functional.vision>
+pkgname=aravis
+pkgver=0.8.26
+pkgrel=0
+pkgdesc="Aravis is a glib/gobject based library for video acquisition using Genicam cameras."
+url="https://github.com/AravisProject/aravis"
+arch="all"
+license="LGPL-2.1"
+depends=""
+makedepends="meson libusb-dev libxml2-dev gtk+3.0-dev gstreamer-dev gst-plugins-base-dev"
+checkdepends=""
+install=""
+subpackages="$pkgname-dev $pkgname-viewer $pkgname-viewer-lang"
+source="$pkgname-$pkgver.tar.xz::https://github.com/AravisProject/aravis/releases/download/0.8.26/aravis-0.8.26.tar.xz
+        aravis-0.8.22.patch"
+
+build() {
+	meson \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var \
+		--buildtype=plain \
+		. output -Dusb=enabled -Dviewer=enabled
+	meson compile ${JOBS:+-j ${JOBS}} -C output
+}
+
+check() {
+	meson test --no-rebuild -v -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+viewer() {
+	mkdir $subpkgdir
+	mkdir -p $subpkgdir/usr/bin
+	mkdir -p $subpkgdir/usr/lib
+	mkdir -p $subpkgdir/usr/share
+	mv $pkgdir/usr/bin/arv*viewer* $subpkgdir/usr/bin/.
+	mv $pkgdir/usr/lib/gstreamer-1.0 $subpkgdir/usr/lib/.
+	mv $pkgdir/usr/share/applications $subpkgdir/usr/share/.
+	mv $pkgdir/usr/share/icons $subpkgdir/usr/share/.
+	mv $pkgdir/usr/share/metainfo $subpkgdir/usr/share/.
+}
+
+viewer_lang() {
+	mkdir $subpkgdir
+	mkdir -p $subpkgdir/usr/share/
+	mv $pkgdir/usr/share/locale $subpkgdir/usr/share/.
+}
+
+sha512sums="d9f4b46b01fa659e208ed9e3148230d5528264638b778960e4f09f5f8974bac6e9bf7370489de1923955ab1f341d6755fb0a43d948315efc74f3e2005f7496ec  aravis-0.8.26.tar.xz
+b69356e9867b431d5c1a194c78dc188e5981dcb84683ebfc608cac0fbc5c6e9f773b5d14c69b81731925190a798c53f9eb1160b947711419aea8b22c4f1cafb0  aravis-0.8.22.patch"
